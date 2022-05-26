@@ -1,0 +1,19 @@
+FROM node:16.10-alpine
+
+WORKDIR /app
+
+# Install dependencies. the `node_modules` folder is in /app
+COPY search-service/package*.json ./
+
+RUN npm install
+
+# Application lays in /app/src
+COPY ./search-service ./
+COPY search-service/entrypoint.sh ./
+
+EXPOSE 9022
+
+ENV OPENSLIDES_DEVELOPMENT 1
+
+ENTRYPOINT [ "./entrypoint.sh" ]
+CMD ["npm", "run", "dev"]

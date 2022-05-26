@@ -1,0 +1,19 @@
+version: "3"
+
+services:
+  search:
+    image: openslides-search-service-dev
+    restart: always
+    env_file: services.env
+    volumes:
+      - ./search-service/src:/app/src
+      - ./search-service/test:/app/test
+    ports:
+      - "9022:9022"
+
+  postgresql:
+    image: postgres:11
+    environment:
+      - POSTGRES_USER=openslides
+      - POSTGRES_PASSWORD=openslides
+      - POSTGRES_DB=openslides
