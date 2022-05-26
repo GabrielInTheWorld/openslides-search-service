@@ -1,9 +1,11 @@
-export class Config {
-	private static readonly VERBOSE_TRUE_FIELDS = ["1", "y", "yes", "true", "on"];
+export const DATABASE_HOST = process.env.DATASTORE_DATABASE_HOST as string;
 
-	public static isDevMode(): boolean {
-		return this.VERBOSE_TRUE_FIELDS.includes(
-			process.env.OPENSLIDES_DEVELOPMENT || ""
-		);
-	}
+export class Config {
+    public static readonly DATABASE_HOST = DATABASE_HOST;
+
+    private static readonly VERBOSE_TRUE_FIELDS = ['1', 'y', 'yes', 'true', 'on'];
+
+    public static isDevMode(): boolean {
+        return this.VERBOSE_TRUE_FIELDS.includes(process.env.OPENSLIDES_DEVELOPMENT || '');
+    }
 }

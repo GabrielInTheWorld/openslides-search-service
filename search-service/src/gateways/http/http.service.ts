@@ -1,5 +1,5 @@
 import axios, { AxiosError, AxiosResponse } from 'axios';
-import { Logger } from 'src/infrastructure/utils/logger';
+import { Logger } from '../../infrastructure/utils/logger';
 import { HttpResponse, HttpMethod, HttpHeaders, HttpData } from './definitions';
 import { HttpClient, HttpRequestConfig } from './http-client';
 
