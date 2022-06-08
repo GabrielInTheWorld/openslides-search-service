@@ -37,6 +37,9 @@ export class PostgreAdapterService implements PostgreService, OnInit {
             user: this._user,
             password: this._password
         });
+        Logger.debug(
+            `Try to connect to ${Config.DATABASE_HOST}:${this._database} with ${this._user}:${this._password}`
+        );
         await this._pgClient.connect();
         const result = await this._pgClient.query('select version()');
         Logger.log(`Connection to database successfully!\nDatabase version:`, result.rows);

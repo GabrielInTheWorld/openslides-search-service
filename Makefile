@@ -5,7 +5,7 @@ build-dev:
 	docker build -t openslides-search-service-dev -f Dockerfile.dev .
 
 build-test:
-	docker build -t openslides-search-service-dev -f Dockerfile.test .
+	docker build -t openslides-search-service-dev -f Dockerfile.dev .
 
 run-dev: | build-dev
 	docker-compose -f docker-compose.dev.yml up

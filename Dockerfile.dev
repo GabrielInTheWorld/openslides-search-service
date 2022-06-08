@@ -5,11 +5,10 @@ WORKDIR /app
 # Install dependencies. the `node_modules` folder is in /app
 COPY search-service/package*.json ./
 
-RUN npm install
+RUN npm ci
 
 # Application lays in /app/src
 COPY ./search-service ./
-COPY search-service/entrypoint.sh ./
 
 EXPOSE 9022
 

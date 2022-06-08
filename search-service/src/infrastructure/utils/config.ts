@@ -1,7 +1,7 @@
-export const DATABASE_HOST = process.env.DATASTORE_DATABASE_HOST as string;
+export const DATASTORE_DATABASE_HOST = process.env.DATASTORE_DATABASE_HOST as string;
 
 export class Config {
-    public static readonly DATABASE_HOST = DATABASE_HOST;
+    public static readonly DATABASE_HOST = DATASTORE_DATABASE_HOST;
 
     private static readonly VERBOSE_TRUE_FIELDS = ['1', 'y', 'yes', 'true', 'on'];
 

@@ -2,10 +2,8 @@
 
 set -e
 
-export CACHE_PORT="${CACHE_PORT:-6379}"
-export MESSAGE_BUS_PORT="${MESSAGE_BUS_PORT:-6379}"
+export POSTGRESQL_PORT="${POSTGRESQL_PORT:-5432}"
 
-./wait-for.sh --timeout=10 "$CACHE_HOST:$CACHE_PORT"
-./wait-for.sh --timeout=10 "$MESSAGE_BUS_HOST:$MESSAGE_BUS_PORT"
+./wait-for.sh --timeout=10 "$POSTGRESQL_HOST:$POSTGRESQL_PORT"
 
 exec "$@"
