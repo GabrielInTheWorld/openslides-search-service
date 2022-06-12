@@ -1,7 +1,9 @@
-import { RestApplication } from 'rest-app';
+import { RestApplication, RoutingError } from 'rest-app';
 import { Request, Response } from 'express';
 import { Logger } from './infrastructure/utils/logger';
 import { SearchController } from './api/search-controller';
+import { SEARCH_SERVICE_PORT } from './infrastructure/utils/config';
+import { createResponse } from './infrastructure/utils/functions';
 
 const logRequestInformation = (req: Request): void => {
     Logger.log(`${req.protocol}://${req.headers.host || ''}: ${req.method} -- ${req.originalUrl}`);
@@ -35,11 +37,8 @@ const logErrors = (error: { toString: () => string }) => {
 };
 
 class Server {
-    public static readonly PORT: number = parseInt(process.env.SEARCH_PORT || '', 10) || 9022;
-    public static readonly DOMAIN: string = process.env.INSTANCE_DOMAIN || 'http://localhost';
-
     public get port(): number {
-        return Server.PORT;
+        return SEARCH_SERVICE_PORT;
     }
 
     private _application = new RestApplication({

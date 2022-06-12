@@ -27,9 +27,14 @@ export class SearchService implements SearchClient, OnInit {
 
     public async search(searchQuery: string): Promise<any> {
         searchQuery = searchQuery.split(' ').join(' | ');
+        Logger.debug(`Start search with query: ${searchQuery}`);
         const promises = this._repositories.map(repo => this.postgre.select(repo.COLLECTION, searchQuery));
         const result = (await Promise.all(promises)).flatMap(entry => entry.rows);
-        Logger.debug(`Search result contains ${result.length} entries.`);
+        const logOutput = result.length === 1 ? `1 entry` : `${result.length} entries`;
+        Logger.debug(`Search result contains ${logOutput}.`);
+        for (const entry of result) {
+            Logger.debug(JSON.stringify(entry));
+        }
         return result;
     }
 
@@ -49,10 +54,10 @@ export class SearchService implements SearchClient, OnInit {
     }
 
     private async logCollections(): Promise<void> {
-        const fqids = await this.postgre.getFqids();
+        const models = await this.postgre.getFqids();
         const collections: { [collection: string]: string[] } = {};
-        for (const fqid of fqids) {
-            const [collection, id] = fqid.fqid.split(`/`);
+        for (const model of models) {
+            const [collection, id] = model.fqid.split(`/`);
             if (!collections[collection]) {
                 collections[collection] = [];
             }

@@ -1,5 +1,5 @@
-export interface SearchServiceResponse<T = unknown> {
-	results: T[];
-	message: string;
-	success: boolean;
+export interface RestServerResponse<T = unknown> {
+    results: T[];
+    message: string;
+    success: boolean;
 }

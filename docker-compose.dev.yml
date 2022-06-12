@@ -2,7 +2,7 @@ version: "3"
 
 services:
   search-service:
-    image: openslides-search-service
+    image: openslides-search-service-dev
     build:
       context: .
       dockerfile: Dockerfile.dev
@@ -13,8 +13,7 @@ services:
       - datastore-writer
       - postgresql
     volumes:
-      - ./search-service/src:/app/src
-      - ./search-service/test:/app/test
+      - ./search-service:/app
     ports:
       - "9022:9022"
 
@@ -45,10 +44,37 @@ services:
     environment:
       - DATASTORE_ENABLE_DEV_ENVIRONMENT=1
       - COMMAND=create_initial_data
-      - DATASTORE_INITIAL_DATA_FILE=https://raw.githubusercontent.com/OpenSlides/openslides-backend/main/docs/example-data.json
+      - DATASTORE_INITIAL_DATA_FILE=https://raw.githubusercontent.com/OpenSlides/openslides-backend/main/global/data/example-data.json
       - OPENSLIDES_DEVELOPMENT=1
     depends_on:
       - postgresql
+      - redis
+
+  auth:
+    build:
+      context: "https://github.com/OpenSlides/openslides-auth-service.git#main"
+      dockerfile: Dockerfile
+    image: openslides-auth
+    ports:
+      - "9004:9004"
+    env_file:
+      - services.env
+    environment:
+      - OPENSLIDES_DEVELOPMENT=1
+    depends_on:
+      - redis
+      - datastore-reader
+
+  autoupdate:
+    build:
+      context: "https://github.com/OpenSlides/openslides-autoupdate-service.git#9fb65150444a37cb8c7947ec11ab724220b2a138"
+      dockerfile: Dockerfile
+    image: openslides-autoupdate
+    env_file:
+      - services.env
+    environment:
+      - OPENSLIDES_DEVELOPMENT=1
+    depends_on:
       - redis
 
   postgresql:

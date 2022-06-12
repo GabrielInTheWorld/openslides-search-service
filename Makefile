@@ -4,15 +4,13 @@ build-prod:
 build-dev:
 	docker build -t openslides-search-service-dev -f Dockerfile.dev .
 
-build-test:
-	docker build -t openslides-search-service-dev -f Dockerfile.dev .
-
 run-dev: | build-dev
 	docker-compose -f docker-compose.dev.yml up
 	stop-dev
 
-run-pre-test: | build-test
+run-pre-test: | build-dev
 	docker-compose -f docker-compose.dev.yml up -d
+	docker-compose -f docker-compose.dev.yml exec -T search-service ./wait-for.sh redis:6379
 	docker-compose -f docker-compose.dev.yml exec -T search-service ./wait-for.sh search-service:9022
 
 run-bash: | run-pre-test

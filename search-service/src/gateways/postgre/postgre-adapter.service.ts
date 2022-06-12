@@ -6,13 +6,14 @@ import { PostgreService } from './postgre.service';
 import { Config } from '../../infrastructure/utils/config';
 import { Logger } from '../../infrastructure/utils/logger';
 
+const DATABASE = `openslides`;
+const USER = `openslides`;
+const PASSWORD = `openslides`;
+
 export class PostgreAdapterService implements PostgreService, OnInit {
     @Inject(HttpService)
     public readonly http!: HttpClient;
 
-    private readonly _database = 'openslides';
-    private readonly _user = 'openslides';
-    private readonly _password = 'openslides';
     private _pgClient: Client | null = null;
 
     public async onInit(): Promise<void> {
@@ -27,38 +28,11 @@ export class PostgreAdapterService implements PostgreService, OnInit {
 
     public async select(columnName: string, query: string): Promise<QueryResult> {
         const client = await this.getClient();
-        return client.query(`select * from models where ${this.getColumnName(columnName)} @@ to_tsquery('${query}`);
-    }
-
-    private async init(): Promise<void> {
-        this._pgClient = new Client({
-            host: Config.DATABASE_HOST,
-            database: this._database,
-            user: this._user,
-            password: this._password
-        });
         Logger.debug(
-            `Try to connect to ${Config.DATABASE_HOST}:${this._database} with ${this._user}:${this._password}`
+            `Query:`,
+            `select * from models where ${this.getColumnName(columnName)} @@ to_tsquery('${query}');`
         );
-        await this._pgClient.connect();
-        const result = await this._pgClient.query('select version()');
-        Logger.log(`Connection to database successfully!\nDatabase version:`, result.rows);
-        // ##############################
-        // ##############################
-        // ######## Query to create an index on specific fields:
-        // ######## "alter table models add column <column-name> tsvector;"
-        // ######## "update models set <column-name> = to_tsvector(coalesce(data ->> '<field>', '')) || to_tsvector(...) || ... where fqid ilike '...';"
-        // ######## "create index <index-name> on models using gin ( <column-name> );"
-        // ######## "select * from models where <column-name> @@ to_tsquery(query);" <- querying for the specific field
-        // ##############################
-        // ##############################
-    }
-
-    private async getClient(): Promise<Client> {
-        if (!this._pgClient) {
-            await this.init();
-        }
-        return this._pgClient as Client;
+        return client.query(`select * from models where ${this.getColumnName(columnName)} @@ to_tsquery('${query}');`);
     }
 
     public async createColumn(name: string): Promise<void> {
@@ -74,7 +48,7 @@ export class PostgreAdapterService implements PostgreService, OnInit {
         const client = await this.getClient();
         const columnName = this.getColumnName(name);
         const toTsVector = this.toTsVector(indexedFields);
-        await client.query(`update models set ${columnName} = ${toTsVector} where fqid like '${name}/%';`);
+        await client.query(`update models set ${columnName} = ${toTsVector} where fqid ilike '${name}/%';`);
         await client.query(`create index if not exists ${columnName}_idx on models using gin (${columnName});`);
     }
 
@@ -98,6 +72,42 @@ export class PostgreAdapterService implements PostgreService, OnInit {
                 `create trigger ${columnName}_trigger before insert or update on models for each row execute function ${triggerName};`
             )
         );
+    }
+
+    public async getPgClient(): Promise<Client | null> {
+        if (Config.isDevMode()) {
+            return await this.getClient();
+        }
+        return null;
+    }
+
+    private async init(): Promise<void> {
+        this._pgClient = new Client({
+            host: Config.DATABASE_HOST,
+            database: DATABASE,
+            user: USER,
+            password: PASSWORD
+        });
+        Logger.debug(`Try to connect to ${Config.DATABASE_HOST}:${DATABASE} with ${USER}:${PASSWORD}`);
+        await this._pgClient.connect();
+        const result = await this._pgClient.query('select version()');
+        Logger.log(`Connection to database successfully!\nDatabase version:`, result.rows);
+        // ##############################
+        // ##############################
+        // ######## Query to create an index on specific fields:
+        // ######## "alter table models add column <column-name> tsvector;"
+        // ######## "update models set <column-name> = to_tsvector(coalesce(data ->> '<field>', '')) || to_tsvector(...) || ... where fqid ilike '...';"
+        // ######## "create index <index-name> on models using gin ( <column-name> );"
+        // ######## "select * from models where <column-name> @@ to_tsquery(query);" <- querying for the specific field
+        // ##############################
+        // ##############################
+    }
+
+    private async getClient(): Promise<Client> {
+        if (!this._pgClient) {
+            await this.init();
+        }
+        return this._pgClient as Client;
     }
 
     private toTsVector(indexedFields: string[], dataPrefix: string = ''): string {

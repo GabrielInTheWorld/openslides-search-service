@@ -28,4 +28,4 @@ COPY --from=build /app/node_modules ./node_modules
 EXPOSE 9022
 ENTRYPOINT [ "./entrypoint.sh" ]
 
-CMD ["node", "index.js"]
+CMD ["node", "server.js"]

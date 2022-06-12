@@ -12,12 +12,12 @@ export interface HttpHeaders {
     [key: string]: string;
 }
 
-export interface HttpData {
-    [key: string]: unknown;
-}
+export type HttpData<D = { [key: string]: unknown }> = D;
 
 export type HttpResponse<T = unknown> = {
     status: number;
+    headers: HttpHeaders;
+    cookies: HttpHeaders;
     message?: string;
     data?: T;
     success?: boolean;
