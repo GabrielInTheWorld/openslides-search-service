@@ -13,6 +13,7 @@ export class HttpService implements HttpClient {
     public async send<R, D>(config: { method: HttpMethod } & HttpRequestConfig<D>): Promise<HttpResponse<R>> {
         const { url, data, headers = DEFAULT_HEADERS, method } = config;
         Logger.debug(`Sending a request: ${method} ${url} ${JSON.stringify(data)} ${JSON.stringify(headers)}`);
+        Logger.debug(`${url} -H '${JSON.stringify(headers)}' -d '${JSON.stringify(data)}'`);
         try {
             const response = await axios({ url, method, data, headers, responseType: 'json' });
             return this.createHttpResponse<R>(response);

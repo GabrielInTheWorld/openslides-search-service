@@ -1,9 +1,6 @@
-import { Collection } from '../../domain/definitions/key-types';
-export interface SearchClientResponse {
-    collection: Collection;
-    fields: { [fieldName: string]: string };
-}
+import { SearchResult } from '../repositories/repository';
+export interface SearchClientResponse extends SearchResult<any> {}
 
 export interface SearchClient {
-    search(query: string): Promise<SearchClientResponse>;
+    search(query: string): Promise<SearchClientResponse[]>;
 }

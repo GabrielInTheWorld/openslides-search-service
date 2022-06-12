@@ -1,9 +1,9 @@
-import { RestApplication, RoutingError } from 'rest-app';
+import { RestApplication } from 'rest-app';
 import { Request, Response } from 'express';
 import { Logger } from './infrastructure/utils/logger';
 import { SearchController } from './api/search-controller';
 import { SEARCH_SERVICE_PORT } from './infrastructure/utils/config';
-import { createResponse } from './infrastructure/utils/functions';
+import { overloadJsFunctions } from './infrastructure/utils/overload-js-functions';
 
 const logRequestInformation = (req: Request): void => {
     Logger.log(`${req.protocol}://${req.headers.host || ''}: ${req.method} -- ${req.originalUrl}`);
@@ -52,6 +52,7 @@ class Server {
 
     public start(): void {
         this._application.start();
+        overloadJsFunctions();
     }
 }
 

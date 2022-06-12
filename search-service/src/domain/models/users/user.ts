@@ -1,5 +1,6 @@
 import { Id } from '../../definitions/key-types';
 import { HasProjectionIds } from '../../interfaces/has-projectable-ids';
+import { Identifiable } from '../../interfaces/identifiable';
 
 /**
  * Representation of a user in contrast to the operator.
@@ -55,4 +56,4 @@ export class User {
     public organization_management_level!: string;
     public committee_$_management_level!: string[];
 }
-export interface User extends HasProjectionIds {}
+export interface User extends Identifiable, HasProjectionIds {}

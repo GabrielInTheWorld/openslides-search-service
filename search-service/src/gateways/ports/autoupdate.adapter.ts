@@ -8,7 +8,7 @@ export class AutoupdateAdapter implements AutoupdatePort {
     @Inject(HttpService)
     private readonly _http!: HttpClient;
 
-    public async request(...data: AutoupdateRequestConfig<any>[]): Promise<{ [index: string]: any }> {
+    public async request(data: AutoupdateRequestConfig<any>[]): Promise<{ [index: string]: any }> {
         return await this._http.post({ url: `${AUTOUPDATE_URL}?single=1`, data });
     }
 }

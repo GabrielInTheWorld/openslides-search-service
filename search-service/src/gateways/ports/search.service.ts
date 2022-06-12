@@ -1,5 +1,5 @@
 import { Inject, OnInit } from 'final-di';
-import { SearchClient } from './search-client';
+import { SearchClient, SearchClientResponse } from './search-client';
 import { PostgreAdapterService } from '../postgre/postgre-adapter.service';
 import { PostgreService } from '../postgre/postgre.service';
 import { Logger } from '../../infrastructure/utils/logger';
@@ -25,32 +25,23 @@ export class SearchService implements SearchClient, OnInit {
         await this.logCollections();
     }
 
-    public async search(searchQuery: string): Promise<any> {
+    public async search(searchQuery: string): Promise<SearchClientResponse[]> {
         searchQuery = searchQuery.split(' ').join(' | ');
         Logger.debug(`Start search with query: ${searchQuery}`);
-        const promises = this._repositories.map(repo => this.postgre.select(repo.COLLECTION, searchQuery));
-        const result = (await Promise.all(promises)).flatMap(entry => entry.rows);
-        const logOutput = result.length === 1 ? `1 entry` : `${result.length} entries`;
+        const promises = this._repositories.map(repo => repo.search(searchQuery));
+        const results = await Promise.all(promises);
+        const logOutput = results.length === 1 ? `1 entry` : `${results.length} entries`;
         Logger.debug(`Search result contains ${logOutput}.`);
-        for (const entry of result) {
+        for (const entry of results) {
             Logger.debug(JSON.stringify(entry));
         }
-        return result;
+        return results;
     }
 
     private async initSearchIndexes(): Promise<void> {
-        const collections = this._repositories.map(repo => repo.getCollection());
-        await Promise.all(collections.map(collection => this.postgre.createColumn(collection)));
-        await Promise.all(
-            this._repositories
-                .map(repo => ({ collection: repo.getCollection(), indexedFields: repo.getSearchableFields() }))
-                .map(item => this.postgre.createIndex(item.collection, item.indexedFields as string[]))
-        );
-        await Promise.all(
-            this._repositories
-                .map(repo => ({ collection: repo.getCollection(), indexedFields: repo.getSearchableFields() }))
-                .map(item => this.postgre.createTriggerFn(item.collection, item.indexedFields as string[]))
-        );
+        await Promise.all(this._repositories.map(repo => repo.buildColumn()));
+        await Promise.all(this._repositories.map(repo => repo.buildIndex()));
+        await Promise.all(this._repositories.map(repo => repo.buildTriggerFn()));
     }
 
     private async logCollections(): Promise<void> {

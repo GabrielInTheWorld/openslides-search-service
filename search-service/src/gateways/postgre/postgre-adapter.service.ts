@@ -26,7 +26,7 @@ export class PostgreAdapterService implements PostgreService, OnInit {
         return result.rows;
     }
 
-    public async select(columnName: string, query: string): Promise<QueryResult> {
+    public async select<R = any>(columnName: string, query: string): Promise<QueryResult<R>> {
         const client = await this.getClient();
         Logger.debug(
             `Query:`,
